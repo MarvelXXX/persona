@@ -269,7 +269,7 @@ Persona-managed entries swipe to “Delete,” removing the stored key too, with
 | `DELETE /api/v1/launchers/{name}` | Delete Persona-managed entries; hide ~/.zshrc entries |
 | `POST /api/v1/launchers/{name}/restore` | Unhide |
 | `GET /api/v1/launchers/{name}/quota?machine=&refresh=1` | Quota (see below): `{machine, checked_at, quota}`, or `{error, unsupported}` if unavailable. The manager caches for one minute; `refresh=1` rereads |
-| `GET /api/v1/machines/{mid}/launchers` | Launchers this computer can start (for pickers): its ~/.zshrc entries excluding hidden ones, plus the Persona-managed entries in its scope (not those skipped for its own service); each includes `source` |
+| `GET /api/v1/machines/{mid}/launchers` | Launchers this computer can start (for pickers): its ~/.zshrc entries excluding hidden ones, plus the Persona-managed entries in its scope (not those skipped for its own service), then the built-in `claude` (`source: "builtin"`) when the computer reported a Claude Code version and its node did not list `claude` itself (a node lists plain `claude` only when its shell defines no claude launcher at all, #4384); each includes `source` |
 
 The assistant's model is selected only in “Model Settings › Main Chat” (“Settings › Assistant” no longer has a model entry, #1291); scheduled tasks' model entry opens unified “Model Settings.” Providers own connections and defaults; purposes own specific choices. See `docs/assistant/model-config.md`.
 

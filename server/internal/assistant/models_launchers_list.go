@@ -199,15 +199,21 @@ func (s *Service) machineLaunchers(ctx context.Context, machine string) ([]proto
 }
 
 // pickerLaunchers is what machine can start, as New Agent's picker lists it: machineLaunchers with hub.json's
-// launchers for it applied (sessionLaunchers).
+// launchers for it applied (sessionLaunchers), and plain claude where the machine has Claude Code.
 func (s *Service) pickerLaunchers(ctx context.Context, machine string) ([]ConfiguredLauncher, error) {
 	ls, err := s.machineLaunchers(ctx, machine)
 	if err != nil {
 		return nil, err
 	}
-	discovered := make([]ConfiguredLauncher, 0, len(ls))
+	discovered := make([]ConfiguredLauncher, 0, len(ls)+1)
 	for _, l := range ls {
 		discovered = append(discovered, ConfiguredLauncher{Launcher: l})
+	}
+	// The node names plain claude only when its shell has no claude launcher at all (node mergeLaunchers), yet it
+	// starts on every machine with Claude Code (launcherEverywhere) and Model Providers shows it there (builtinClaude):
+	// one ~/.zshrc alias must not take it out of the pickers (#4384). Last, so the first pick a client makes stays the same.
+	if d, _ := s.device(ctx, machine); d.ClaudeVersion != "" && !slices.ContainsFunc(ls, func(l proto.Launcher) bool { return l.Name == "claude" }) {
+		discovered = append(discovered, ConfiguredLauncher{Launcher: proto.Launcher{Name: "claude", Source: "builtin"}})
 	}
 	return sessionLaunchers(discovered, s.hello(ctx).Models.Launchers[machine]), nil
 }
