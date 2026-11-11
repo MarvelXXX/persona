@@ -111,12 +111,14 @@ describe("handing a to-do to a new agent", () => {
     expect(select().options[0].textContent).toBe("跟随模型配置");
   });
 
-  it("adds a launcher as a model provider from the form", async () => {
+  it("opens Settings › Model providers to add, hide or restore launchers", async () => {
     launchers = [{ name: "claude" }];
     const onClose = vi.fn();
     await open(onClose);
-    await act(async () => document.querySelector<HTMLButtonElement>('[data-testid="todo-handoff-add-provider"]')!.click());
+    const manage = document.querySelector<HTMLButtonElement>('[data-testid="todo-handoff-manage-launchers"]')!;
+    expect(manage.textContent).toBe("管理启动器");
+    await act(async () => manage.click());
     expect(onClose).toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith("/settings?tab=models&add=1");
+    expect(navigate).toHaveBeenCalledWith("/settings?tab=models#settings-providers");
   });
 });

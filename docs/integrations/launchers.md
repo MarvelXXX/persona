@@ -10,10 +10,10 @@ Code: `server/internal/assistant/models_launchers.go` (owned by the manager; hub
 | --- | --- | --- |
 | **Persona-managed** | Added in the app: name, Base URL, API Key, authentication method, model, small model, sub-Agent model, custom model option, extra arguments | Edit, delete |
 | **rc file (~/.zshrc / ~/.bashrc) and PATH** | Functions and aliases in each computer's login shell config (zsh reads `~/.zshrc`, bash reads `~/.bashrc`), grouped by file, and wrapper scripts on its PATH (`source: "path"`), shown from the last snapshot and refreshed in the background when opening this page (node caches for 1 minute) | View each computer's function definition or script text (Key / Token redacted), hide / restore in Persona |
-| **Built-in** | Each computer's plain `claude` command (“Claude Code default” in Model Configuration, `source: "builtin"`), listed per computer with its version | View only; can't be hidden (the hub refuses) |
+| **Built-in** | Each computer's plain `claude` command (“Claude Code default” in Model Configuration, `source: "builtin"`), listed per computer with its version | View, hide / restore in Persona (#4384) |
 
 - Scope: each Persona-managed entry has its own **device scope** (“Device scope and on-demand delivery” below): all your computers, chosen ones, or none (the key stays with the manager). ~/.zshrc entries identify their source computers (same-name entries merge into one row). Offline computers use their last synchronized lists (settings `launchers.zshrc`).
-- Deleting a ~/.zshrc launcher **only hides it in Persona** (settings `launchers.hidden`), leaving the file unchanged; it disappears from new-chat and assistant pickers.
+- Deleting a ~/.zshrc launcher **only hides it in Persona** (settings `launchers.hidden`), leaving the file unchanged; it disappears from new-chat and assistant pickers. Hiding the built-in `claude` works the same way (#4384): it leaves the pickers, while a start that names it, or a default that runs it (Model settings set to “Claude Code default”), still runs it.
 - Persona-managed entries win name collisions (shadowing the ~/.zshrc entry). Names may contain only letters, digits, `_`, and `-`, and cannot be `claude`.
 
 ## Sync state (#2854)
@@ -269,7 +269,7 @@ Persona-managed entries swipe to “Delete,” removing the stored key too, with
 | `DELETE /api/v1/launchers/{name}` | Delete Persona-managed entries; hide ~/.zshrc entries |
 | `POST /api/v1/launchers/{name}/restore` | Unhide |
 | `GET /api/v1/launchers/{name}/quota?machine=&refresh=1` | Quota (see below): `{machine, checked_at, quota}`, or `{error, unsupported}` if unavailable. The manager caches for one minute; `refresh=1` rereads |
-| `GET /api/v1/machines/{mid}/launchers` | Launchers this computer can start (for pickers): its ~/.zshrc entries excluding hidden ones, plus the Persona-managed entries in its scope (not those skipped for its own service), then the built-in `claude` (`source: "builtin"`) when the computer reported a Claude Code version and its node did not list `claude` itself (a node lists plain `claude` only when its shell defines no claude launcher at all, #4384); each includes `source` |
+| `GET /api/v1/machines/{mid}/launchers` | Launchers this computer can start (for pickers): its ~/.zshrc entries excluding hidden ones, plus the Persona-managed entries in its scope (not those skipped for its own service); each includes `source` |
 
 The assistant's model is selected only in “Model Settings › Main Chat” (“Settings › Assistant” no longer has a model entry, #1291); scheduled tasks' model entry opens unified “Model Settings.” Providers own connections and defaults; purposes own specific choices. See `docs/assistant/model-config.md`.
 

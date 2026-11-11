@@ -247,43 +247,6 @@ func TestDispatchSwapsWhenThePreviewCouldNotTell(t *testing.T) {
 	})
 }
 
-// A shell with claude aliases of its own makes the node list only those (#4384); plain claude still starts there, so the
-// pickers keep it (after the computer's own launchers), once, and only where Claude Code is.
-func TestPickerKeepsPlainClaudeBesideShellLaunchers(t *testing.T) {
-	s, f := launcherFitHub(t)
-	f.zshrc["box"] = []proto.Launcher{{Name: "claude", Source: "zshrc"}, {Name: "gateway", Source: "zshrc"}}
-	f.sessions["pc"] = nil
-	f.devices = append(f.devices, Device{ID: "pc", Name: "pc", Home: "/home/me", Online: true, Reachable: true})
-	f.zshrc["pc"] = []proto.Launcher{{Name: "codex", Agent: "codex", Source: "zshrc"}}
-	picker := func(machine, query string) string {
-		var out struct {
-			Launchers []struct {
-				Name      string `json:"name"`
-				Source    string `json:"source"`
-				AgentType string `json:"agent_type"`
-			} `json:"launchers"`
-		}
-		if err := json.Unmarshal(getJSON(t, s, "/api/v1/machines/"+machine+"/launchers"+query), &out); err != nil {
-			t.Fatal(err)
-		}
-		var got []string
-		for _, l := range out.Launchers {
-			got = append(got, l.Name+":"+l.Source+":"+l.AgentType)
-		}
-		return strings.Join(got, ", ")
-	}
-	for _, c := range []struct{ machine, query, want string }{
-		{"l4", "", "other:zshrc:claude, claude:builtin:claude"},
-		{"box", "", "claude:zshrc:claude, gateway:zshrc:claude"}, // the node named it: as it said, not twice
-		{"pc", "", "codex:zshrc:codex"},                          // no Claude Code reported there: nothing added
-		{"l4", "?purpose=assistant", "other:zshrc:claude, claude:builtin:claude"},
-	} {
-		if got := picker(c.machine, c.query); got != c.want {
-			t.Errorf("%s%s: %s, want %s", c.machine, c.query, got, c.want)
-		}
-	}
-}
-
 func TestLauncherInstead(t *testing.T) {
 	runtime := proto.Launcher{Name: "dsh", Source: "dsh"}
 	codex := proto.Launcher{Name: "codex", Agent: "codex", Source: "zshrc"}

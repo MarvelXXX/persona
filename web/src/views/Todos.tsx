@@ -6,6 +6,7 @@ import { launchAgent } from "../lib/new-agent";
 import { initialLauncher, launcherBlock, usableFirst } from "../lib/launcher-health";
 import { defaultLabel, machineLaunchers, type LauncherDefault } from "../lib/launcher-models";
 import { navigate } from "../lib/router";
+import { settingsHref } from "./settings/nav";
 import { interactionAsk } from "../lib/inbox";
 import { usageLimitLabel } from "../lib/usage-limit";
 import { plainMarkdown } from "../lib/plain-markdown";
@@ -2481,18 +2482,18 @@ export function HandoverDialog({
                     <span className="min-w-0">{pickedBlock.reason}</span>
                   </p>
                 )}
-                {/* a launcher the list lacks is added as a model provider, as New Agent's "how to fix" does */}
+                {/* add, hide or restore launchers (#4384): Settings › Model providers, as New Agent's entry */}
                 <button
                   type="button"
-                  data-testid="todo-handoff-add-provider"
+                  data-testid="todo-handoff-manage-launchers"
                   onClick={() => {
                     onClose();
-                    navigate("/settings?tab=models&add=1");
+                    navigate(settingsHref("models", null, false, null, "providers"));
                   }}
                   className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] font-medium whitespace-nowrap text-accent-ink hover:underline"
                 >
-                  <Icon name="plus" size={11} />
-                  {t("newagent.add_provider")}
+                  <Icon name="gear" size={11} />
+                  {t("newagent.manage_launchers")}
                 </button>
               </div>
             )}
